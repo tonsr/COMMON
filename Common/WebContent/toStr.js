@@ -1,3 +1,8 @@
+/**
+ * 为JSON对象扩展方法，将json格式数据转换成String类型
+ * @author 唐明豪
+ * @date 2015-08-03
+ * */
 var JSON = function(){};
 JSON.toStr=function(obj){
 	if(JSON.isArray(obj)){

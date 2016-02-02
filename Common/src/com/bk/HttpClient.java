@@ -67,12 +67,35 @@ public class HttpClient {
 		this.out.flush();
 		wirte(out);
 	}
-
+	/**
+	*获取输出流
+	*/
 	public void get(OutputStream out) throws IOException{
 		connect();
 		conn.setRequestMethod("GET");
 		this.conn.connect();
 		wirte(out);
+	}
+	/**
+	* 获取html内容
+	*/
+	public String get() throws IOException{
+		connect();
+		conn.setRequestMethod("GET");
+		this.conn.connect();
+		String line = null;
+		BufferedReader reader = null;
+		try{
+			reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+			StringBuffer sb = new StringBuffer();
+			while ((line=reader.readLine())!=null) {
+				sb.append(line);
+			}
+			reader.close();
+			return sb.toString();
+		} finally {
+			if(reader!=null) reader.close();
+		}
 	}
 	
 	private void wirte(OutputStream out) throws IOException {

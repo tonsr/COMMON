@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<script>
+var $ = function(){
+    if(typeof arguments[0] == "function"){
+        arguments[0]();
+    }else{
+        var sect = [];
+        if(typeof arguments[0]=="object"&&/[object HTML.*?Element]/.test(arguments[0])){
+            sect = [arguments[0]];
+        }else if(arguments[0].indexOf('#')==0){
+            var s = document.getElementById(arguments[0].substring(1));
+            if(s){sect.push(s);}
+        }else if(arguments[0].indexOf('.')==0){
+            var s = document.getElementsByClassName(arguments[0].substring(1));
+            if(s) sect = s;
+        }else{
+            var s = document.getElementsByTagName(arguments[0]);
+            if(s) sect = s;
+        }
+        for(var k in $.fn){
+            sect[k] = $.fn[k];
+        }
+        sect.selector = arguments[0];
+        return sect;
+    }
+}
+$.fn = { 
+   data:function(arg,arg1){
+      if(arg1){
+          this[0].arg = arg1;
+          return this;
+      }else{
+          return this[0].arg;
+      }
+   },
+   html:function(arg){
+      if(arg){
+         for(var i=0 ;i<this.length;i++){
+             this[i].innerHTML = arg;
+         }
+         return this;
+      }else{
+         return this[0].outerHTML;
+      }
+   },
+   attr:function(arg,val){
+      if(val){
+        for(var i=0 ;i<this.length;i++){
+          this[i].setAttribute(arg,val);
+        }
+        return this;
+      }else{
+        return this[0].getAttribute(arg);
+      }
+   },
+   delAttr:function(arg){
+      if(arg){
+        for(var i = 0;i<this.length;i++){
+          this[i].removeAttribute(arg);
+        }
+      }
+      return this;
+   },
+   text:function(arg){
+     if(arg){
+       for(var i=0;i<this.length;i++){
+        this[i].innerHTML = arg;
+       }
+       return this;
+     }else{
+      return this[0].textContent;
+     }
+   },
+   on:function(event,upfunc){
+    if(upfunc){
+      if(typeof event == "string" && typeof upfunc=="function"){
+        for(var i=0;i<this.length;i++){
+          this[i]["on"+event] = upfunc;
+        }
+      }
+    }else{
+      if(typeof event == "string" ){
+        for(var i=0;i<this.length;i++){
+          this[i]["on"+event]();
+        }
+      }
+    }
+    return this;
+   },
+   off:function(event){
+    if(event){
+      for(var i=0;i<this.length;i++){
+        this[i]["on"+event]=undefined;
+        this[i].removeAttribute("on"+event);
+      }
+    }
+    return this;
+   },
+   each:function(upfunc){
+    if(upfunc){
+      for(var i=0;i<this.length;i++){
+        upfunc.call(this[i],i);
+      }
+    }
+    return this;
+   },
+   click:function(args){
+     return $(this.selector).on("click",args);
+   }
+}
+$.fn.extend = function(json){
+  for(var key in json){
+    $.fn[key]=json[key];
+  }
+}
+$.each = function(ary,upfunc){
+  for(var i in ary){
+    upfunc(i,ary[i]);
+  }
+}
+$.data = function(ele,arg,args){
+   if(ele=="[object HTMLDivElement]"){
+      return $(ele).data(arg,args);
+   }else if(typeof ele== "string"){
+      if(arg){
+         $.cache[ele]=arg;
+      }else{
+         return $.cache[ele];
+      }
+   }
+}
+$.cache = {
+}
+
+function load(){
+$("#div").html("<ul><li>aaaa</li><li>bbbb</li></ul>").data("hello",{options:{aa:"as",bb:"asdsad"}});
+
+$("li").click(function(){
+  if($(this).attr("arc")){
+    $(this).delAttr("arc");
+  }else{
+    $(this).attr("arc","nihao");
+  }
+});
+$("li").click();
+$("body").on("keydown",function(e){
+  console.log("keydown -->",e.code);
+});
+
+
+setTimeout(function(){
+  $("body").off("keydown");
+  console.log("keydown close!");
+},5000);
+
+$($("li")[0]).text("hello");
+console.log($($("li")).text());
+$("li").attr("ni","who are you !");
+$("li").each(function(){
+    $(this).attr("attr","hellll");
+});
+//console.log($("div").data("hello"));
+
+
+$.fn.extend({
+  hello:function(){
+    $(this[0]).attr("nio","as");
+    return this;
+  }
+});
+//$.data($("#div")[0],"name",{hello:"asdasd"});
+//console.log($.data($("#div")[0],"name"));
+$("body").hello();
+}
+</script>
+<body onload="load()">
+<div id="div"></div>
+<div id="div1" class='div'></div>
+<div id="div2" class='div'></div>
+</body>
+</html>

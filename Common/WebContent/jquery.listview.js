@@ -119,10 +119,12 @@
 					
 					if(!flag){
 						for(var ni=nodes.length-1;ni>=0;ni--){
-							for(var ci=0;ci<nodes[ni].childs.length;ci++){
-								if(nodes[ni].childs[ci].checked==true){
-									nodes[ni]={};
-									break;
+							if(nodes[ni].childs){
+								for(var ci=0;ci<nodes[ni].childs.length;ci++){
+									if(nodes[ni].childs[ci].checked==true){
+										nodes.splice(ni,1);
+										break;
+									}
 								}
 							}
 						}
@@ -140,7 +142,58 @@
 			}
 			$.data($(this).parent()[0],"nodedata").checked = flag;
 		}
-		
+		var formartNode = function(options,node){
+			var checkType;
+			if(node.checkType=="checkbox"||node.checkType=="radio"){
+				checkType = node.checkType;
+			}else{
+				checkType = options.check.type;
+			}
+			
+			//清除原有样式
+			var span = $(this).find(".icon")
+						.removeClass(options.check[checkType].checked)
+						.removeClass(options.check[checkType].half)
+						.removeClass(options.check[checkType].disable)
+						.addClass(options.check[checkType].empty);
+			
+			if(options.check.enable){
+				var jq=this;
+				if(span.length<=0){
+					span = $("<i class='icon "+options.check[checkType].empty+"'></i>");
+					span.prependTo(jq);
+				}
+				
+				if(node.checkDisable!=true){
+					if(node.checked){//如果节点是选中状态  更新样式
+						span.removeClass(options.check[checkType].empty).addClass(options.check[checkType].checked);
+					}
+					span.off("click");
+					span.on("click",function(){
+						if(checkType=="radio"){
+							if(options.event.onCheckBefore.call($(this),true,$.data($(this).parent()[0],"nodedata"))){
+								checkNode.call(this,options.check[checkType],checkType,true);
+								options.event.onCheck.call($(this),$.data($(this).parent()[0],"nodedata"));
+							}
+						}else if(checkType=="checkbox"){
+							//任意节点勾选
+							var node = $.data($(this).parent()[0],"nodedata"),flag=$(this).hasClass(options.check[checkType].checked);
+							if(options.event.onCheckBefore.call($(this),flag,node)){
+								if(flag){
+									checkNode.call(this,options.check[checkType],checkType,false);
+								}else{
+									checkNode.call(this,options.check[checkType],checkType,true);
+								}
+								options.event.onCheck.call($(this),$.data($(this).parent()[0],"nodedata"));
+							}
+						}
+					});
+				}else{
+					span.off("click");
+					span.addClass(options.check[checkType].disable);
+				}
+			}
+		}
 		$.fn.listview.methods = {
 			options:function(){
 				return $.data(this[0],"listview");
@@ -194,8 +247,8 @@
 						//节点刷新
 						var jq = this;
 						$.each(nodes,function(i,item){
-							if($.data(jq,"nodedata")[options.view.idKey]==(item[options.view.idKey]||item)){
-								options.formartNode.call($(jq),options,node);
+							if($.data(jq,"nodedata")[options.view.idKey]==(item[options.view.idKey].toString()||item)){
+								formartNode.call($(jq),options,node);
 								return true;
 							}
 						});
@@ -247,7 +300,7 @@
 			getNodePath:function(node){
 				//获取节点路径
 				var nodes=[],pnode = this.listview("getRoot"),opt = this.listview("options").options.view;
-				node = node[opt.idKey]||node;
+				node = node[opt.idKey].toString()||node;
 
 				for(var pi=0;pi<pnode.length;pi++){
 					nodes = getNodePathByFileter(function(n){
@@ -311,19 +364,24 @@
 							p.off("click tap");
 							p.on("click tap",function(){
 								var pp = $(this).parent(),dd,parent = $(this).closest("ul");
-								parent.hide();
-								if(dd = $.data(pp[0],"nodedata").childs){
-									dd.parent = parent;
-									options.loadChild.call(shower,options,dd);
-								} else if(options.async){
-									options.ajaxer.call(options,$.data(pp[0],"nodedata"),function(data){
-										data = options.dataFilter(data);
-										data.parent = parent;
-										$.data(pp[0],"nodedata").childs = data;
-										options.loadChild.call(shower,options,data);
-									});
+								if(options.event.onExpandBefore.call(shower,$.data(pp[0],"nodedata"))){
+									parent.hide();
+									if(dd = $.data(pp[0],"nodedata").childs){
+										dd.parent = parent;
+										options.loadChild.call(shower,options,dd);
+									} else if(options.async){
+										options.ajaxer.call(options,$.data(pp[0],"nodedata"),function(data){
+											data = options.dataFilter(data);
+											data.parent = parent;
+											$.data(pp[0],"nodedata").childs = data;
+											options.loadChild.call(shower,options,data);
+										});
+									}
+									options.event.onExpand.call(shower,$.data(pp[0],"nodedata"))
 								}
 							});
+
+							options.createTool.call(li,data[i]);
 						}
 						li.off("click tap");
 						li.on("click tap",function(){
@@ -336,6 +394,8 @@
 							$.data(this,"nodedata").selected = true;
 							options.event.onClick.call(this,$.data(this,"nodedata"));
 						});
+						
+						formartNode.call(li,options,data[i]);
 						options.formartNode.call(li,options,data[i]);
 					}
 				});
@@ -347,6 +407,8 @@
 			onLoad:function(){},
 			event:{
 				onClick:function(){},
+				onExpandBefore:function(node){return true;},
+				onExpand:function(node){},
 				onCheckBefore:function(node){return true;},
 				onCheck:function(node){}
 			},
@@ -356,6 +418,7 @@
 				data[0].checkDisable = true;
 				return data;
 			},
+			createTool:function(node){},//this当前 li元素
 			url:"",
 			param:{id:"pid"},
 			ajaxer:function(opt,node,upfunc){
@@ -377,7 +440,7 @@
 			},
 			createNav:function(opt,data,parent){
 				var li = $("<li></li>");
-				var prev = $("<i class='icon-chevron-left'>"+data[opt.view.nameKey]+"</i>");
+				var prev = $("<i class='icon-chevron-left btn-back'><span class='btn-text'>"+data[opt.view.nameKey]+"</span></i>");
 				prev.off("click");
 				prev.on("click",function(){
 					$(this.closest("ul")).remove();
@@ -386,58 +449,7 @@
 				prev.prependTo(li);
 				li.appendTo(this);
 			},
-			formartNode:function(options,node){
-				var checkType;
-				if(node.checkType=="checkbox"||node.checkType=="radio"){
-					checkType = node.checkType;
-				}else{
-					checkType = options.check.type;
-				}
-				
-				//清除原有样式
-				var span = $(this).find(".icon")
-							.removeClass(options.check[checkType].checked)
-							.removeClass(options.check[checkType].half)
-							.removeClass(options.check[checkType].disable)
-							.addClass(options.check[checkType].empty);
-				
-				if(options.check.enable){
-					var jq=this;
-					if(span.length<=0){
-						span = $("<i class='icon "+options.check[checkType].empty+"'></i>");
-						span.prependTo(jq);
-					}
-					
-					if(node.checkDisable!=true){
-						if(node.checked){//如果节点是选中状态  更新样式
-							span.removeClass(options.check[checkType].empty).addClass(options.check[checkType].checked);
-						}
-						span.off("click");
-						span.on("click",function(){
-							if(checkType=="radio"){
-								if(options.event.onCheckBefore.call($(this),true,$.data($(this).parent()[0],"nodedata"))){
-									checkNode.call(this,options.check[checkType],checkType,true);
-									options.event.onCheck.call($(this),$.data($(this).parent()[0],"nodedata"));
-								}
-							}else if(checkType=="checkbox"){
-								//任意节点勾选
-								var node = $.data($(this).parent()[0],"nodedata"),flag=$(this).hasClass(options.check[checkType].checked);
-								if(options.event.onCheckBefore.call($(this),flag,node)){
-									if(flag){
-										checkNode.call(this,options.check[checkType],checkType,false);
-									}else{
-										checkNode.call(this,options.check[checkType],checkType,true);
-									}
-									options.event.onCheck.call($(this),$.data($(this).parent()[0],"nodedata"));
-								}
-							}
-						});
-					}else{
-						span.off("click");
-						span.addClass(options.check[checkType].disable);
-					}
-				}
-			},
+			formartNode:function(options,node){ }, //li 元素
 			check:{
 				enable:true,
 				type:"radio",
@@ -451,31 +463,32 @@
 	
 	$(function(){
 		$("#input").listview({
-			//data:[{id:0,name:"1111"},{id:2,name:"2222",checked:true},{id:3,name:"3333",pid:2},{id:4,name:"4444",pid:2,checked:true},{id:5,name:"5555",pid:2,checked:true},{id:6,name:"6666",pid:3},{id:7,name:"7777",pid:3},{id:8,name:"8888",pid:4,checked:true},{id:9,name:"9999",pid:8},{id:10,name:"1010",pid:8},{id:12,name:"1011",pid:11}],
-			url:"../user/getTree",
-			view:{idKey:"id",nameKey:"name",pidKey:"pid"},
+			data:[{id:0,name:"1111"},{id:2,name:"2222",checked:true},{id:3,name:"3333",pid:2,checkType:"radio"},{id:4,name:"4444",pid:2,checked:true,checkType:"radio"},{id:5,name:"5555",pid:2,checked:true},{id:6,name:"6666",pid:3},{id:7,name:"7777",pid:3},{id:8,name:"8888",pid:4,checked:true},{id:9,name:"9999",pid:8},{id:10,name:"1010",pid:8},{id:12,name:"1011",pid:11}],
+			//url:"../user/getTree",
+			//view:{idKey:"id",nameKey:"name",pidKey:"pid"},
+			event:{
+				onCheck:function(data){
+					console.log(data);
+				},
+				onClick:function(data){
+					console.log("click",data);
+				}
+			},
 			onLoad:function(){
-				//this.listview("checkNodes","00000000210000000319",true);
 				this.listview("refeshNodes",function(node,item){
-					//node.chkDisable=true;
 					if(node.type=="dept"){
 						node.checkDisable = true;
 					}
 				},function(options,node,item){
-					//options.formartNode.call($(this),options,node);
 					if($.data(this,"nodedata").type=="dept"){
-						options.formartNode.call($(this),options,node);
+						formartNode.call($(this),options,node);
 					}
 				})
-				//this.listview("checkNodes",true,this.listview("getNodes","id","0000000018"));
-				/*var node = this.listview("getNodes","id","00000026")[0];
-				node.hello = "xxxxxxxxxxxxxxx";
-				node.checked=true;
-				this.listview("updateNode",node);
-				console.log(this.listview("getNodes","id","00000026"));*/
 			},
 			check:{
-				type:"radio"
+				type:"checkbox",
+				radio:{type:"level"},
+				checkbox:{type:{Y:"",N:"ps"}}
 			}
 		});
 		

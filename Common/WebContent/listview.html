@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+	<title></title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<script type="text/javascript" src="../editor-app/libs/jquery_1.11.0/jquery.min.js"></script>
+	
+    <link rel="stylesheet" href="../editor-app/awesome/css/font-awesome.css">
+	<style type="text/css">
+		input{
+			width:100%;
+			height:30px;
+			border:1px solid #ddd;
+			border-radius:3px;
+		}
+		.listview{
+			padding: 10px;
+		}
+		.listview .icon{
+			padding: 5px;
+		}
+		.listview .icon-right{
+			float:right;
+			line-height: 40px;
+		}
+		.listview ul{
+			list-style: none;
+			margin: 0;
+			padding: 0;
+		}
+		.listview ul li:first-child{
+			border-top:1px solid #ddd;
+			border-top-left-radius:5px;
+			border-top-right-radius:5px;
+		}
+		.listview .icon-disable{
+			color:#aaa;
+		}
+		.listview .icon-number{
+			color:#aaa;
+			font-family: "Verdana";
+			margin-right:10px;
+		}
+		.listview ul li:last-child{
+			border-bottom-left-radius:5px;
+			border-bottom-right-radius:5px;
+		}
+		.listview ul li {
+			line-height:40px;
+			border:1px solid #ddd;
+			border-top:none;
+			padding:0px 10px;
+		}
+		.listview .current_node{
+			background:-moz-linear-gradient( top,#bbb,#fff,#ddd);
+			background:-webkit-linear-gradient(top,#eee,#fff,#efefef);
+		}
+	</style>
+	<script type="text/javascript" src="listview.js"></script>
+</head>
+<body>
+	<input id="input" type="text" class="">
+	<input type="button" value="测试">
+</body>
+</html>

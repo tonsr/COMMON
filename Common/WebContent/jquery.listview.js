@@ -57,15 +57,21 @@
 		}
 		
 		var getNodeByClosest = function(param,val,node){
-			var ns = [];
+			var ns = [],nstemp;
 			if(node.childs&&node.childs.length>0)
 				$.each(node.childs,function(i,item){
-					ns = ns.concat(getNodeByClosest(param,val,item));
+					nstemp = getNodeByClosest(param,val,item);
+					if(typeof nstemp=="boolean") return nstemp;
+					else if(nstemp instanceof Array){
+						ns = ns.concat(nstemp);
+					}
 				});
 			if(val instanceof RegExp){
 				if(val.test(node[param])) ns.push(node);
 			}else if(val instanceof Function){
-				if(val(node)) ns.push(node);
+				var res;
+				if((res=val(node))==undefined) ns.push(node);
+				else if(res==false) return ns;
 			}else if(node[param]== val) ns.push(node);
 			
 			return ns;
@@ -114,8 +120,9 @@
 				type = flag?"Y":"N";
 				if(check.type[type].indexOf("p")!=-1){
 					//级联销毁父级选中
+					$.data($(this).parent()[0],"nodedata").checked=flag;
 					var nodes = list.listview("getNodePath",$.data($(this).parent()[0],"nodedata"));
-					list.listview("extendNodes",nodes,{checked:flag});
+					//list.listview("extendNodes",nodes,{checked:flag});
 					
 					if(!flag){
 						for(var ni=nodes.length-1;ni>=0;ni--){
@@ -142,7 +149,10 @@
 			}
 			$.data($(this).parent()[0],"nodedata").checked = flag;
 		}
+		var halfSelectNode = function(options,node){
+		}
 		var formartNode = function(options,node){
+			console.log("formartNode:",node);
 			var checkType;
 			if(node.checkType=="checkbox"||node.checkType=="radio"){
 				checkType = node.checkType;
@@ -179,15 +189,12 @@
 							//任意节点勾选
 							var node = $.data($(this).parent()[0],"nodedata"),flag=$(this).hasClass(options.check[checkType].checked);
 							if(options.event.onCheckBefore.call($(this),flag,node)){
-								if(flag){
-									checkNode.call(this,options.check[checkType],checkType,false);
-								}else{
-									checkNode.call(this,options.check[checkType],checkType,true);
-								}
+								checkNode.call(this,options.check[checkType],checkType,!flag);
 								options.event.onCheck.call($(this),$.data($(this).parent()[0],"nodedata"));
 							}
 						}
 					});
+					halfSelectNode.call(jq,options,node);
 				}else{
 					span.off("click");
 					span.addClass(options.check[checkType].disable);
@@ -214,7 +221,7 @@
 					for(var index = 0;index<pnode.length;index++){
 						if(pnode[index]){
 							getNodeByClosest("",function(node){
-								putAction.call(options,node);
+								if(putAction.call(options,node)==false) return false;
 							},pnode[index]);
 						}
 					}
@@ -227,28 +234,73 @@
 					});
 				});
 			},
+			checkAllNodes:function(flag,pnode){
+				return this.each(function(){
+					var opt = $(this).listview("options");
+					if(!pnode||pnode.length<=0)
+						pnode = $(this).listview("getRoot");
+					
+					if(!(pnode instanceof Array)) pnode = [pnode];
+					for(var index = 0;index<pnode.length;index++){
+						if(pnode[index]){
+							getNodeByClosest("",function(node){
+								if(node.type=="nav"){
+									console.log("非数据节点忽略操作！");
+									return;
+								}
+								node.checked = flag;
+							},pnode[index]);
+						}
+					}
+					var node;
+					opt.view.find("li").each(function(){
+						if((node = $.data(this,"nodedata"))!=undefined)
+							formartNode.call($(this),opt.options,node);
+					});
+				});
+			},
 			checkNodes:function(nodes,flag,pnode){
 				return this.each(function(){
 					if(typeof nodes=="boolean"){
-						pnode = flag; flag = nodes;
-						nodes = $(this).listview("getNodes","",function(){return true;},pnode);
+						return $(this).listview("checkAllNodes",nodes,flag);
 					}
+					if(nodes.length==0) {
+						return;
+					}
+					var reshnode = nodes.slice(0);
 					//这里分步处理 是由于有些节点并没有在前端展示 也就不需要刷新
 					$(this).listview("refeshNodes",function(node){
+						if(nodes.length==0){
+							console.log("停止刷新操作！");
+							return false;
+						} 
 						//后台数据增加
 						var opt = this;
+						console.log("即将处理节点：",node,"候选节点",nodes);
+						if(node.type=="nav"){
+							console.log("非数据节点忽略操作！");
+							return;
+						} 
 						$.each(nodes,function(i,item){
-							if(item[opt.view.idKey]==node[opt.view.idKey]){
+							console.log("后台数据增加:",item);
+							var val =item[opt.view.idKey];
+							if(val==undefined) val = item;
+							if(val==node[opt.view.idKey]){
+								console.log("找到节点：",item);
 								node.checked = flag;
-								return true;
+								nodes.splice(i,1);
+								return false;
 							}
 						});
 					},function(options,node){
 						//节点刷新
 						var jq = this;
-						$.each(nodes,function(i,item){
-							if($.data(jq,"nodedata")[options.view.idKey]==(item[options.view.idKey].toString()||item)){
+						$.each(reshnode,function(i,item){
+							var val = item[options.view.idKey];
+							if(val==undefined) val=item;
+							if($.data(jq,"nodedata")[options.view.idKey]==val){
 								formartNode.call($(jq),options,node);
+								nodes.splice(i,1);
 								return true;
 							}
 						});
@@ -463,15 +515,19 @@
 	
 	$(function(){
 		$("#input").listview({
-			data:[{id:0,name:"1111"},{id:2,name:"2222",checked:true},{id:3,name:"3333",pid:2,checkType:"radio"},{id:4,name:"4444",pid:2,checked:true,checkType:"radio"},{id:5,name:"5555",pid:2,checked:true},{id:6,name:"6666",pid:3},{id:7,name:"7777",pid:3},{id:8,name:"8888",pid:4,checked:true},{id:9,name:"9999",pid:8},{id:10,name:"1010",pid:8},{id:12,name:"1011",pid:11}],
+			data:[{id:0,name:"1111"},{id:2,name:"2222",checked:true},
+			      {id:3,name:"3333",pid:2},{id:4,name:"4444",pid:2,checked:true},
+			      {id:5,name:"5555",pid:2,checked:true},
+			      {id:6,name:"6666",pid:3},{id:7,name:"7777",pid:3},
+			      {id:8,name:"8888",pid:4,checked:true},
+			      {id:9,name:"9999",pid:8},{id:10,name:"1010",pid:8},
+			      {id:12,name:"1011",pid:11}],
 			//url:"../user/getTree",
 			//view:{idKey:"id",nameKey:"name",pidKey:"pid"},
 			event:{
 				onCheck:function(data){
-					console.log(data);
 				},
 				onClick:function(data){
-					console.log("click",data);
 				}
 			},
 			onLoad:function(){
@@ -483,12 +539,12 @@
 					if($.data(this,"nodedata").type=="dept"){
 						formartNode.call($(this),options,node);
 					}
-				})
+				});
 			},
 			check:{
 				type:"checkbox",
-				radio:{type:"level"},
-				checkbox:{type:{Y:"",N:"ps"}}
+				radio:{type:"all"},
+				checkbox:{type:{Y:"p",N:"s"}}
 			}
 		});
 		

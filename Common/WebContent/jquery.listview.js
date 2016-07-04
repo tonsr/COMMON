@@ -147,14 +147,20 @@
 		var halfSelect = function(node,flag){
 			getNodeByClosest("",function(item){
 				if(item.childs){
-					var half  = false,isall=true;
+					var half  = false,isall=true,isbreak=false;
 					$.each(item.childs,function(i,ic){
 						if(ic.type=='nav') return true;
-						if(ic.checked||ic.half){
+						if(ic.half){
+							item.half  = true;
+							isbreak = true;
+							return false;
+						}
+						if(ic.checked){
 							half = true;
 							return false;
 						}
 					});
+					if(isbreak) return;
 					$.each(item.childs,function(i,ic){
 						if(ic.type=='nav') return true;
 						if(!ic.checked){
@@ -534,11 +540,11 @@
 			formartNode:function(options,node){ }, //li 元素
 			check:{
 				enable:true,
-				type:"radio",
+				type:"checkbox",
 				nocheckInherit:true,//继承父级节点的checked属性
 				chkDisabledInherit:true,//继承父级disable属性
 				checkbox:{checked:"icon-check",empty:"icon-check-empty",half:"icon-check-half",type:{ "Y": "ps", "N": "ps" },disable:"icon-disable"},
-				radio:{checked:"icon-ok-sign",empty:"icon-circle-blank",half:"icon-circle",type:"all"||"level",disable:"icon-disable"}
+				radio:{checked:"icon-ok-sign",empty:"icon-circle-blank",half:"icon-check-half",type:"all"||"level",disable:"icon-disable"}
 			}
 		}
 	})(jQuery);

@@ -37,6 +37,9 @@
 		.listview .icon-disable{
 			color:#aaa;
 		}
+		.listview .icon-check-half{
+			color:#aaa;
+		}
 		.listview .icon-number{
 			color:#aaa;
 			font-family: "Verdana";
@@ -68,11 +71,75 @@
 		.listview .btn-text{
 			padding-left:10px;
 		}
+		
+		.textbox{
+			border:1px solid #ddd;
+			display: inline-block;
+		}
+		.textbox .textfiled{
+			height:auto;
+			line-height:30px;
+			border:none;
+			width: 100px;
+		    display: inline-block;
+		}
+		.textbox .textboxbutten{
+			background: #09f;
+			line-height: 30px;
+			padding: 0px 10px;
+			display: inline-block;
+		}
+		.comboboxpanuel {
+			border:1px solid #ddd;
+			border-top: none;
+		}
+		.comboboxpanuel .item{
+			border-top:1px solid #ddd;
+			line-height:30px;
+		}
+		.comboboxpanuel .selected{
+			background:#09f;
+			color:#FFF;
+		}
 	</style>
 	<script type="text/javascript" src="jquery.listview.js"></script>
+	<script type="text/javascript" src="jquery.textbox.js"></script>
+	<script type="text/javascript" src="jquery.combobox.js"></script>
 </head>
 <body>
 	<input id="input" type="text" class="">
-	<input type="button" value="测试">
+	<input id="textbox" type="text" class="">
+	<script type="text/javascript">
+	
+
+	$(function(){
+		$("#input").listview({
+			data:[{id:0,name:"1111",checkDisable:true,checked:true},{id:2,name:"2222",checked:true},
+			      {id:3,name:"3333",pid:2},{id:4,name:"4444",pid:2,checked:true},
+			      {id:5,name:"5555",pid:2,checked:true},
+			      {id:6,name:"6666",pid:3},{id:7,name:"7777",pid:3},
+			      {id:8,name:"8888",pid:4,checked:true},
+			      {id:9,name:"9999",pid:8},{id:10,name:"1010",pid:8},
+			      {id:12,name:"1011",pid:11}],
+			//url:"../user/getTree",
+			//view:{idKey:"id",nameKey:"name",pidKey:"pid"},
+			event:{
+				onCheck:function(data){
+				},
+				onClick:function(data){
+				}
+			},
+			onLoad:function(){
+			},
+			check:{
+				type:"checkbox",
+				radio:{type:"level"},
+				checkbox:{type:{Y:"",N:""}}
+			}
+		});
+		$("#input").listview("addChilds",[{id:"01",name:"xxx",pid:0},{id:"02",name:"xx2x",pid:0}],{id:0});
+		$("#input").listview("checkAllNodes",true,0);
+	});
+	</script>
 </body>
 </html>

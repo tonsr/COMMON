@@ -11,8 +11,9 @@
 			$.data(this[0],"listview",{options:opt,view:div,shower:this});
 			
 			if(opt.data&&opt.data.length>0){
-				if(opt.view.simple)
+				if(opt.view.simple){
 					opt.data = grepAry(opt,opt.data);
+				}
 				this.listview("loadData",opt.data);
 			}else{
 				var jq = this;
@@ -26,18 +27,8 @@
 			}
 		}
 		//将普通json转换成具有层级结构的json数据
-		var grepAry = function(opt,data){
-			var ary = [];
-			$.inIds = function(id,data){
-				for(var i =0;i<data.length;i++){
-					if(data[i][opt.view.idKey] == id) return true;
-				}
-				return false;
-			}
-			ary = $.grep(data,function(item){
-				if(!item[opt.view.pidKey]) return true;
-				return $.inIds(item[opt.view.pidKey],data);
-			});
+		var grepAry = function(opt,data,filter){
+			var ary = data;
 			$.each(ary,function(i,aritem){
 				aritem.childs=$.grep(data,function(item){
 					if(item[opt.view.pidKey] == aritem[opt.view.idKey]){
@@ -45,6 +36,9 @@
 						return true;
 					}return false;
 				});
+				if(typeof filter=="function"){
+					filter(aritem);
+				}
 				if(aritem.childs&&aritem.childs.length>0){
 					aritem.isParent = true;
 				}else aritem.isParent = false;
@@ -149,10 +143,36 @@
 			}
 			$.data($(this).parent()[0],"nodedata").checked = flag;
 		}
-		var halfSelectNode = function(options,node){
+		//++
+		var halfSelect = function(node,flag){
+			getNodeByClosest("",function(item){
+				if(item.childs){
+					var half  = false,isall=true;
+					$.each(item.childs,function(i,ic){
+						if(ic.type=='nav') return true;
+						if(ic.checked||ic.half){
+							half = true;
+							return false;
+						}
+					});
+					$.each(item.childs,function(i,ic){
+						if(ic.type=='nav') return true;
+						if(!ic.checked){
+							isall = false;
+							return false;
+						}
+					});
+					item.half = half;
+					if(item.checked){
+						item.half = !isall;
+					}
+				}
+			},node);
+			if(node.half)
+				this.addClass(flag);
 		}
 		var formartNode = function(options,node){
-			console.log("formartNode:",node);
+			
 			var checkType;
 			if(node.checkType=="checkbox"||node.checkType=="radio"){
 				checkType = node.checkType;
@@ -178,6 +198,8 @@
 					if(node.checked){//如果节点是选中状态  更新样式
 						span.removeClass(options.check[checkType].empty).addClass(options.check[checkType].checked);
 					}
+					halfSelect.call(span,node,options.check[checkType].half);
+					
 					span.off("click");
 					span.on("click",function(){
 						if(checkType=="radio"){
@@ -193,8 +215,10 @@
 								options.event.onCheck.call($(this),$.data($(this).parent()[0],"nodedata"));
 							}
 						}
+
+						//++
+						formartNode.call($(this).parent()[0],options,$.data($(this).parent()[0],"nodedata"));
 					});
-					halfSelectNode.call(jq,options,node);
 				}else{
 					span.off("click");
 					span.addClass(options.check[checkType].disable);
@@ -497,6 +521,12 @@
 				prev.on("click",function(){
 					$(this.closest("ul")).remove();
 					parent.show();
+
+					//++
+					parent.find("li").each(function(){
+						if($.data(this,"nodedata"))
+							formartNode.call(this,opt,$.data(this,"nodedata"));
+					})
 				});
 				prev.prependTo(li);
 				li.appendTo(this);
@@ -507,48 +537,9 @@
 				type:"radio",
 				nocheckInherit:true,//继承父级节点的checked属性
 				chkDisabledInherit:true,//继承父级disable属性
-				checkbox:{checked:"icon-check",empty:"icon-check-empty",half:"icon-circle-blank",type:{ "Y": "ps", "N": "ps" },disable:"icon-disable"},
+				checkbox:{checked:"icon-check",empty:"icon-check-empty",half:"icon-check-half",type:{ "Y": "ps", "N": "ps" },disable:"icon-disable"},
 				radio:{checked:"icon-ok-sign",empty:"icon-circle-blank",half:"icon-circle",type:"all"||"level",disable:"icon-disable"}
 			}
 		}
 	})(jQuery);
 	
-	$(function(){
-		$("#input").listview({
-			data:[{id:0,name:"1111"},{id:2,name:"2222",checked:true},
-			      {id:3,name:"3333",pid:2},{id:4,name:"4444",pid:2,checked:true},
-			      {id:5,name:"5555",pid:2,checked:true},
-			      {id:6,name:"6666",pid:3},{id:7,name:"7777",pid:3},
-			      {id:8,name:"8888",pid:4,checked:true},
-			      {id:9,name:"9999",pid:8},{id:10,name:"1010",pid:8},
-			      {id:12,name:"1011",pid:11}],
-			//url:"../user/getTree",
-			//view:{idKey:"id",nameKey:"name",pidKey:"pid"},
-			event:{
-				onCheck:function(data){
-				},
-				onClick:function(data){
-				}
-			},
-			onLoad:function(){
-				this.listview("refeshNodes",function(node,item){
-					if(node.type=="dept"){
-						node.checkDisable = true;
-					}
-				},function(options,node,item){
-					if($.data(this,"nodedata").type=="dept"){
-						formartNode.call($(this),options,node);
-					}
-				});
-			},
-			check:{
-				type:"checkbox",
-				radio:{type:"all"},
-				checkbox:{type:{Y:"p",N:"s"}}
-			}
-		});
-		
-		setTimeout(function(){
-			console.log("NODES:",$("#input").listview("getNodes","checked",true));
-		},3000);
-	})

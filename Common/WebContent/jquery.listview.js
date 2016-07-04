@@ -150,12 +150,12 @@
 					var half  = false,isall=true,isbreak=false;
 					$.each(item.childs,function(i,ic){
 						if(ic.type=='nav') return true;
-						if(ic.half){
+						if(ic.half){ //子节点半选  父节点必须半选
 							item.half  = true;
 							isbreak = true;
 							return false;
 						}
-						if(ic.checked){
+						if(ic.checked){ //子节点选中 父节点需判定 是否全选
 							half = true;
 							return false;
 						}
@@ -169,7 +169,7 @@
 						}
 					});
 					item.half = half;
-					if(item.checked){
+					if(item.checked){//父节点选中 看看子节点是否全选了
 						item.half = !isall;
 					}
 				}
@@ -231,12 +231,46 @@
 				}
 			}
 		}
+		var createChildBtn = function(options,node){
+			var shower = options.shower;
+			options = options.options;
+			var p = $("<i class='icon-right icon-plus-sign-alt'></i>");
+			var count = node.childs.length;
+			if(node.childs[0].type=="nav"){
+				count = node.childs.length-1;
+			}
+			count = $("<i class='icon-right icon-number'>"+count+"</i>");
+			
+			this.append(p);
+			this.append(count);
+			p.off("click tap");
+			p.on("click tap",function(){
+				var pp = $(this).parent(),dd,parent = $(this).closest("ul");
+				if(options.event.onExpandBefore.call(shower,$.data(pp[0],"nodedata"))){
+					parent.hide();
+					if(dd = $.data(pp[0],"nodedata").childs){
+						dd.parent = parent;
+						options.loadChild.call(shower,options,dd);
+					} else if(options.async){
+						options.ajaxer.call(options,$.data(pp[0],"nodedata"),function(data){
+							data = options.dataFilter(data);
+							data.parent = parent;
+							$.data(pp[0],"nodedata").childs = data;
+							options.loadChild.call(shower,options,data);
+						});
+					}
+					options.event.onExpand.call(shower,$.data(pp[0],"nodedata"))
+				}
+			});
+
+			options.createTool.call(this,node);
+		}
 		$.fn.listview.methods = {
 			options:function(){
 				return $.data(this[0],"listview");
 			},
 			//刷新节点
-			refeshNodes:function(pnode,putAction,dealAction){
+			refreshNodes:function(pnode,putAction,dealAction){
 				return this.each(function(){
 					if(pnode instanceof Function){
 						dealAction = putAction;putAction = pnode;
@@ -299,7 +333,7 @@
 					}
 					var reshnode = nodes.slice(0);
 					//这里分步处理 是由于有些节点并没有在前端展示 也就不需要刷新
-					$(this).listview("refeshNodes",function(node){
+					$(this).listview("refreshNodes",function(node){
 						if(nodes.length==0){
 							console.log("停止刷新操作！");
 							return false;
@@ -418,9 +452,8 @@
 			//加载具有树形结构的数据
 			loadData:function(data){
 				return this.each(function(){
-					var ul = $("<ul></ul>"),li,input,inputtype,options = $(this).listview("options"),shower = options.shower;
-					ul.appendTo(options.view);
-					options = options.options;
+					var ul = $("<ul></ul>"),li,input,inputtype,opt = $(this).listview("options"),options = opt.options;
+					ul.appendTo(opt.view);
 					$.data(ul[0],"listview",this);
 					
 					for(var i=0;i<data.length;i++){
@@ -434,36 +467,7 @@
 						$.data(li[0],"nodedata",data[i]);
 						//绑定父级节点
 						if(data[i].isParent){
-							var p = $("<i class='icon-right icon-plus-sign-alt'></i>");
-							var count = data[i].childs.length;
-							if(data[i].childs[0].type=="nav"){
-								count = data[i].childs.length-1;
-							}
-							count = $("<i class='icon-right icon-number'>"+count+"</i>");
-							
-							li.append(p);
-							li.append(count);
-							p.off("click tap");
-							p.on("click tap",function(){
-								var pp = $(this).parent(),dd,parent = $(this).closest("ul");
-								if(options.event.onExpandBefore.call(shower,$.data(pp[0],"nodedata"))){
-									parent.hide();
-									if(dd = $.data(pp[0],"nodedata").childs){
-										dd.parent = parent;
-										options.loadChild.call(shower,options,dd);
-									} else if(options.async){
-										options.ajaxer.call(options,$.data(pp[0],"nodedata"),function(data){
-											data = options.dataFilter(data);
-											data.parent = parent;
-											$.data(pp[0],"nodedata").childs = data;
-											options.loadChild.call(shower,options,data);
-										});
-									}
-									options.event.onExpand.call(shower,$.data(pp[0],"nodedata"))
-								}
-							});
-
-							options.createTool.call(li,data[i]);
+							createChildBtn.call(li,opt,data[i]);
 						}
 						li.off("click tap");
 						li.on("click tap",function(){
@@ -480,6 +484,35 @@
 						formartNode.call(li,options,data[i]);
 						options.formartNode.call(li,options,data[i]);
 					}
+				});
+			},
+			addChilds:function(nodes,pnode){
+				return this.each(function(){
+					var opt = $.data(this,"listview");
+					if(typeof pnode=="string")
+						pnode = eval("{"+opt.options.view.idKey+":'"+pnode+"'}");
+					if(opt.options.check.nocheckInherit||opt.options.check.chkDisabledInherit){
+						pnode = $(this).listview("getNodes",opt.options.view.idKey,pnode[opt.options.view.idKey])[0];
+						$.each(nodes,function(i,item){
+							if(!item.checked&&opt.options.check.nocheckInherit){
+								item.checked = pnode.checked;
+							}
+							if(!item.checkDisable&&opt.options.check.chkDisabledInherit){
+								item.checkDisable = pnode.checkDisable;
+							}
+						});
+					}
+					$(this).listview("refreshNodes",function(node){
+						if(node[this.view.idKey]==pnode[this.view.idKey]){
+							node.isParent=true;
+							node.childs = nodes;
+						}
+					},function(options,node){
+						if(node[options.view.idKey]==pnode[options.view.idKey]){
+							createChildBtn.call($(this),opt,node);
+							formartNode.call($(this),options,node);
+						}
+					});
 				});
 			}
 		}
@@ -549,3 +582,8 @@
 		}
 	})(jQuery);
 	
+	
+	(function($){
+		$.extend(true,$.fn.listview.methods,{
+		})
+	})(jQuery)

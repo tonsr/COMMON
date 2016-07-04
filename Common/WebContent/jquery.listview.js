@@ -200,12 +200,12 @@
 					span.prependTo(jq);
 				}
 				
+				if(node.checked){//如果节点是选中状态  更新样式
+					span.removeClass(options.check[checkType].empty).addClass(options.check[checkType].checked);
+				}
+				halfSelect.call(span,node,options.check[checkType].half);
+				
 				if(node.checkDisable!=true){
-					if(node.checked){//如果节点是选中状态  更新样式
-						span.removeClass(options.check[checkType].empty).addClass(options.check[checkType].checked);
-					}
-					halfSelect.call(span,node,options.check[checkType].half);
-					
 					span.off("click");
 					span.on("click",function(){
 						if(checkType=="radio"){
@@ -284,6 +284,8 @@
 					//后端js修改数据
 					for(var index = 0;index<pnode.length;index++){
 						if(pnode[index]){
+							if(typeof pnode[index]=="string")
+								pnode[index] = $(this).listview("getNodes",options.view.idKey,pnode[index][options.view.idKey])[0];
 							getNodeByClosest("",function(node){
 								if(putAction.call(options,node)==false) return false;
 							},pnode[index]);
@@ -293,7 +295,7 @@
 					//前段刷新
 					jq.find("li").each(function(){
 						if($.data(this,"nodedata")){
-							dealAction.call(this,options,$.data(this,"nodedata"));
+							if(dealAction.call(this,options,$.data(this,"nodedata"))==false) return false;
 						}
 					});
 				});
@@ -301,10 +303,15 @@
 			checkAllNodes:function(flag,pnode){
 				return this.each(function(){
 					var opt = $(this).listview("options");
-					if(!pnode||pnode.length<=0)
-						pnode = $(this).listview("getRoot");
+					if(typeof pnode=="number"||typeof pnode=="string")
+						pnode = $(this).listview("getNodes",opt.options.view.idKey,pnode);
+					else if(!(pnode instanceof Array)) 
+						pnode = [pnode];
+					else{
+						if(pnode==undefined||pnode.length<=0)
+							pnode = $(this).listview("getRoot");
+					}
 					
-					if(!(pnode instanceof Array)) pnode = [pnode];
 					for(var index = 0;index<pnode.length;index++){
 						if(pnode[index]){
 							getNodeByClosest("",function(node){
@@ -491,8 +498,9 @@
 					var opt = $.data(this,"listview");
 					if(typeof pnode=="string")
 						pnode = eval("{"+opt.options.view.idKey+":'"+pnode+"'}");
+					
+					pnode = $(this).listview("getNodes",opt.options.view.idKey,pnode[opt.options.view.idKey])[0];
 					if(opt.options.check.nocheckInherit||opt.options.check.chkDisabledInherit){
-						pnode = $(this).listview("getNodes",opt.options.view.idKey,pnode[opt.options.view.idKey])[0];
 						$.each(nodes,function(i,item){
 							if(!item.checked&&opt.options.check.nocheckInherit){
 								item.checked = pnode.checked;
@@ -502,16 +510,19 @@
 							}
 						});
 					}
-					$(this).listview("refreshNodes",function(node){
-						if(node[this.view.idKey]==pnode[this.view.idKey]){
+					$(this).listview("refreshNodes",pnode,function(node,item){
+						//debugger;
+						//if(node[this.view.idKey]==pnode[this.view.idKey]){
 							node.isParent=true;
 							node.childs = nodes;
-						}
+						//	return false;
+						//}
 					},function(options,node){
-						if(node[options.view.idKey]==pnode[options.view.idKey]){
+						//if(node[options.view.idKey]==pnode[options.view.idKey]){
 							createChildBtn.call($(this),opt,node);
 							formartNode.call($(this),options,node);
-						}
+							return false;
+						//}
 					});
 				});
 			}

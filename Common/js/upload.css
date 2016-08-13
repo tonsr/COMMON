@@ -1,0 +1,41 @@
+
+	    .uploadview{
+	    	padding: 10px;
+	    }
+	    .uploadview img{
+	        width: 70px;
+	    	height: 70px;
+	    }
+	    .uploadview .item{
+	    	margin-left:10px;
+	    }
+	    .uploadpanel .controller{
+	        line-height: 40px;
+		    border-bottom: 1px solid #ddd;
+		    background: #efefef;
+	    }
+	    .uploadpanel .controller .select{
+    	    margin-left: 10px;
+		    padding: 9px;
+		    margin-top: 27px;
+		    position: inherit;
+		    color: #FFF;
+		    border-radius: 3px;
+		    background: #09f;
+	    }
+	    .uploadview .select:active{
+	    	background:#046FB6;
+	    }
+	    .uploadview .icon{
+			margin-left: -30px;
+		    font-size: 30px;
+		    background: rgba(0, 0, 0, 0.48);
+		    color: #FFF;
+		}
+	    .uploadview .filedes{
+	    	display: none;
+		}
+	    .uploadlist{
+	        width: 100%;
+    		overflow-x: auto;
+	    }

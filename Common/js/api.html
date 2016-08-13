@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style type="text/css">
+			table{width:100%;border: 1px solid #ddd;}
+			td{border: 1px solid #ddd;}
+		</style>
+		<script type="text/javascript" src="../editor-app/libs/jquery_1.11.0/jquery.min.js"></script>
+	</head>
+	<body>
+		<h1>jquery.listview </h1>
+		<table>
+			<caption><h1>protytype ·½·¨</h1></caption>
+			<tr>
+				<td>·½·¨Ãû</td>
+				<td>²ÎÊý</td>
+				<td>·µ»ØÖµ</td>
+			</tr>
+			<tr>
+				<td>grepAry</td>
+				<td>
+					<ul>
+						<li>opt <i>ÅäÖÃ²ÎÊý   ÓÃÀ´´¦Àídata²ÎÊýÖÐµÄ²ã¼¶¹ØÏµºÍÕ¹Ê¾ÐÅÏ¢</i><br/>opt.view={idKey:"id",nameKey:"name",pidKey:"pid"}</li>
+						<li>data <i>¼´½«´¦ÀíµÄÊý¾Ý¼¯ºÏ  ±ØÐëÎªÊý×éÀàÐÍ ÇÒ ÅäÖÃÎÄ¼þÖÐ°üº¬ÒÔÉÏÐÅÏ¢ </i><br/>[{id:"1",name:"hello"},{id:"2",name:"hello",pid:"1"}]</li>
+					</ul>
+					</td>
+				<td>
+					¾ßÓÐ²ã¼¶½á¹¹µÄÊý¾Ý¼¯ºÏ
+					<br />
+					[{id:"1",name:"hello",childs:[{id:"2",name:"hello",pid:"1"}]}]
+				</td>
+			</tr>
+			<tr>
+				<td>eachNode</td>
+				<td>
+					<ul>
+						<li>
+							<ul>
+								<li>val: ÀàÐÍÕýÔò±í´ïÊ½  »òÕæÊµÊý¾ÝÖµ ¡£¹ýÂËº¯Êý:·µ»Øfalse ÔòÍ£Ö¹²éÕÒ  ·µ»Ø:true ºöÂÔÖµ  ÎÞ·µ»ØÖµ»ò·µ»Øundefined ¸ÃÖµÂú×ãÌõ¼þ</li>
+								<li>node: Ö¸¶¨½Úµã</li>
+								<li>key: ÐèÒª±ãÀû½ÚµãµÄÊý¾Ý (¿É¿Õ)Ä¬ÈÏchilds</li>
+							</ul>
+						</li>
+						<li>
+							<ul>
+								<li>param: ½Úµã¼°×Ó½ÚµãµÄÊôÐÔ</li>
+								<li>val: ÀàÐÍÕýÔò±í´ïÊ½  »òÕæÊµÊý¾ÝÖµ Óë×Ó½ÚµãparamÆ¥Åä ³É¹¦Âú×ãÌõ¼þ ¡£¹ýÂËº¯Êý:·µ»Øfalse ÔòÍ£Ö¹²éÕÒ  ·µ»Ø:true ºöÂÔÖµ  ÎÞ·µ»ØÖµ»ò·µ»Øundefined ¸ÃÖµÂú×ãÌõ¼þ</li>
+								<li>node: Ö¸¶¨½Úµã</li>
+								<li>key: ÐèÒª±ãÀû½ÚµãµÄÊý¾Ý (¿É¿Õ)Ä¬ÈÏchilds</li>
+							</ul>
+						</li>
+					</ul>
+				</td>
+				<td>
+					Âú×ãÌõ¼þµÄ½Úµã¼¯ºÏ
+					<br />
+					[{id:"xxx",name:"xxx"},{id:"222",name:"333"}]
+				</td>
+			</tr>
+			<tr>
+				<td>getNodePathByFileter</td>
+				<td>
+					<ul>
+						<li>filter  ¹ýÂËº¯Êý   µ«·µ»ØÖµÎªÎª·Ç¿ÕÊý×éÔò³ÌÐòÓÐÐ§Öð¼¶·µ»Ø</li>
+						<li>node ¾ßÓÐ²ã¼¶¹ØÏµµÄnode½Úµã   </li>
+						<li>key ´¦Àí½ÚµãÊôÐÔ Ä¬ÈÏÎªchilds</li>
+					</ul>
+				</td>
+				<td>·µ»Ø Âú×ãÌõ¼þµÄnode½ÚµãÂ·¾¶</td>
+			</tr>
+			<tr><td colspan="3">À©Õ¹$.fn.listview.defaults.protytype</td></tr>
+		</table>
+		
+		<table>
+			<caption><h1>jquery.listview  ÊôÐÔ</h1></caption>
+			<tr>
+				<td>ÊôÐÔÃû</td>
+				<td>Öµ</td>
+				<td>Ä¬ÈÏ</td>
+			</tr>
+			<tr>
+				<td>view</td>
+				<td>
+					{simple:true,idKey:"id",nameKey:"name",pidKey:"pid"},
+					<ul>
+						<li>simple:true  ÎÞ²ã¼¶½á¹¹µÄÊý¾Ý±êÊ¶ </li>
+						<li>idKey:"id"   idÊôÐÔ¹ØÁª</li>
+						<li>nameKey:"name"   ÏÔÊ¾µÄÎÄ±¾¹ØÁª</li>
+						<li>pidKey:"pid"   ¸¸¼¶½Úµã¹ØÁª</li>
+					</ul>
+				</td>
+				<td></td>
+			</tr>
+			<tr>
+				<td>async</td>
+				<td>
+					Òì²½Ô¶³ÌÊý¾Ý»ñÈ¡£¬µ±½Úµã°üº¬ÊôÐÔ isParent ÇÒ²»°üº¬ÊôÐÔ  childsÊÇ ³ÌÐò»áÔ¶³Ì»ñÈ¡
+				</td>
+				<td>true</td>
+			</tr>
+			<tr>
+				<td>event</td>
+				<td>
+					<ul>
+						<li> onLoad:function(){}, ³ÌÐòµÚÒ»´ÎÔ¶³ÌÊý¾ÝÇëÇóÊý¾ÝÌî³äÍê³Éºó´¥·¢ target:listview Èë²Îopt(ÅäÖÃÎÄ¼þ),data(Êý¾Ý)</li>
+						<li> onClick:function(){}, µ¥»÷½Úµã´¥·¢ target µ±Ç°½Úµã liÔªËØ node ½ÚµãÊý¾Ý</li>
+						<li> onExpandBefore:function(node){return true;}, ½ÚµãÕ¹¿ªÇ°Ö´ÐÐ  µ«·µ»Øtrue Ôò´ò¿ª ·ñÔò¾ù²»ÏìÓ¦Õ¹¿ª²Ù×÷</li>
+						<li> onExpand:function(node){},  ½ÚµãÕ¹¿ªÍê³É  Èë²Î ½ÚµãÊý¾Ý</li>
+						<li> onCheckBefore:function(node){return true;}, Ñ¡ÖÐ½ÚµãÇ°Ö´ÐÐ  ·µ»Øtrue Ñ¡ÖÐ ·ñÔò²»ÏìÓ¦²Ù×÷</li>
+						<li> onCheck:function(node){} ½ÚµãÑ¡ÖÐºó´¥·¢  Èë²Î ½ÚµãÊý¾Ý</li>
+					</ul>
+				</td>
+				<td></td>
+			</tr>
+			<tr>
+				<td>dataFilter</td>
+				<td>
+					Ô¶³ÌÊý¾Ý¼ÓÔØ¹ýÂË  Èë²Î ÇëÇóºó·µ»ØµÄÊý¾Ý   ·µ»Ø ¼´½«´¦ÀíµÄ½ÚµãÊý×éÊý¾Ý
+				</td>
+				<td> return arguments[0]</td>
+			</tr>
+			<tr>
+				<td>createTool</td>
+				<td>
+					ÎªÃ¿¸ö½ÚµãÔö¼ÓÒ»¸ö×Ô¶¨Òå¹¤¾ß  target:liÔªËØ Èë²Îµ±Ç°½ÚµãÊý¾Ý
+				</td>
+				<td> </td>
+			</tr>
+			<tr>
+				<td>url</td>
+				<td>
+					Ô¶³ÌÊý¾Ý¼ÓÔØµØÖ·
+				</td>
+				<td> </td>
+			</tr>
+			<tr>
+				<td>ajaxer</td>
+				<td>
+					Êý¾ÝÇëÇóÆ÷  µ±»ñÈ¡µ½Êý¾Ýºó  ÐèÒªÖ´ÐÐ¸¸½Úµã´«ÈëµÄ»Øµôº¯Êý target options argument[0]:µ±Ç°ËùÑ¡½Úµã  arguments[1]:»Øµôº¯Êý  ´«Èëdata;
+				</td>
+				<td> </td>
+			</tr>
+			<tr>
+				<td>loadChild</td>
+				<td>
+					¼ÓÔØ×Ó½ÚµãÇ°Êý¾ÝÀ¹½Ø  ¿ÉÌÞ³ýÒ»²¿·ÖÊý¾Ý 
+					¿ÉÒÔÔö¼Ó¶à¸ö type=="nav"ÀàÐÍµÄ½Úµã
+				</td>
+				<td> </td>
+			</tr>
+			<tr>
+				<td>createNav</td>
+				<td>
+					µ±½ÚµãÀàÐÍÎª nav Ê± À¹½Ø´¦Àí 
+					 ³ÌÐòÄ¬ÈÏÎª½ÚµãÔö¼ÓÁËÒ»¸ö·µ»Ø°´Å¥
+				</td>
+				<td> </td>
+			</tr>
+			<tr>
+				<td>reFormartNode</td>
+				<td>
+					½ÚµãË¢ÐÂÀ¹½Ø   ´´½¨Ã¿¸ö½Úµã³ÌÐò¶¼»áµ÷ÓÃµ½Ë¢ÐÂ²Ù×÷ target li argumenus[0]:options arguments[1]:µ±Ç°½ÚµãÊý¾Ý
+				</td>
+				<td> </td>
+			</tr>
+			<tr>
+				<td>check</td>
+				<td>
+				<ul>
+					<li>enable:true, ÆôÓÃ½ÚµãÑ¡Ôñ¹¦ÄÜ</li>
+					<li>type:"radio", ½ÚµãÀàÐÍ</li>
+					<li>
+						<ul>checkbox
+						<li> checked:"icon-check" Ñ¡ÖÐÑùÊ½</li> 
+						<li> empty:"icon-check-empty" Çå¿ÕÑùÊ½</li> 
+						<li> half:"icon-circle-blank" °ëÑ¡ÑùÊ½</li> 
+						<li> disable:"icon-disable" ½ûÓÃÑùÊ½</li> 
+						<li> type:{ "Y": "ps", "N": "ps" } ½ÚµãÑ¡Ôñ×Ô¶¯´¥·¢ÅäÖÃ    Y£º½ÚµãÑ¡ÖÐ    p:¸¸¼¶½Úµã   s:×Ó½Úµã N£º½ÚµãÈ¡ÏûÑ¡ÖÐ    p:¸¸¼¶½Úµã   s:×Ó½Úµã</li> 
+						</ul>
+						<ul>radio
+						<li> checked:"icon-ok-sign" Ñ¡ÖÐÑùÊ½</li> 
+						<li> empty:"icon-circle-blank" Çå¿ÕÑùÊ½</li> 
+						<li> half:"icon-circle" °ëÑ¡ÑùÊ½</li> 
+						<li> disable:"icon-disable" ½ûÓÃÑùÊ½</li> 
+						<li> type:"all"||"level" all È«¾Öµ¥Ñ¡  level Í¬¼¶µ¥Ñ¡</li> 
+						</ul>
+					</li>
+				</ul>
+				</td>
+				<td> </td>
+			</tr>
+			<tr><td colspan="3">À©Õ¹$.fn.listview.defaults</td></tr>
+		</table>
+		
+		<table>
+			<caption><h1>jquery.listview  ·½·¨</h1></caption>
+			<tr>
+				<td>ÊôÐÔÃû</td>
+				<td>Öµ</td>
+				<td>Ä¬ÈÏ</td>
+			</tr>
+			<tr>
+				<td>options</td>
+				<td>»ñÈ¡½Úµã°ó¶¨µÄÊý¾Ý</td>
+				<td>view ÏÔÊ¾µÄdiv²ã  options ½ÚµãÅäÖÃÐÅÏ¢ </td>
+			</tr>
+			<tr>
+				<td>refeshNodes</td>
+				<td>Ë¢ÐÂ½Úµã  atguments[0] ¹ýÂËº¯Êý Èë²Î½ÚµãÊý¾Ý ·µ»ØfalseÖÕÖ¹º¯ÊýÔËÐÐ ´Ë´¦¿ÉÒÔÎªnodeÔö¼ÓÊôÐÔ£¬arguments[1] ÏÔÊ¾½Úµã´¦Àíº¯Êý Èë²Îoptions ÅäÖÃÐÅÏ¢ node ½ÚµãÊý¾Ý</td>
+				<td></td>
+			</tr>
+			<tr>
+				<td>checkAllNodes</td>
+				<td>Ñ¡ÖÐÈ«²¿½Úµã  atguments[0] ½ÚµãÑ¡ÖÐ×´Ì¬ true Ñ¡ÖÐ false È¡ÏûÑ¡ÖÐ£¬arguments[1] ÐèÒª´¦ÀíµÄ½Úµã  Îª¿Õ ÔòÈ«¾Ö´¦Àí ·ñÔò´¦Àíµ±Ç°´«Èë½Úµã</td>
+				<td></td>
+			</tr>
+			<tr>
+				<td>checkNodes</td>
+				<td><ul>
+				<li>Ñ¡ÖÐÖ¸¶¨½Úµã  atguments[0] ËùÑ¡½Úµã  ¿ÉÒÔÊÇ idKeyÒÔ','·Ö¸îµÄstring ÒÔÊý×éÐÎÊ½µÄidKey£¬´Ó×ÊÔ´»ñÈ¡µÄ½Úµã£¬arguments[1] ½ÚµãÑ¡ÖÐ×´Ì¬ </li>
+				<li>Ñ¡ÖÐÖ¸¶¨½Úµã  atguments[0] ½Úµã×´Ì¬ arguments[1] Ö¸¶¨µÄ¸¸¼¶½Úµã </li>
+				</td>
+				<td></td>
+			</tr>
+			<tr>
+				<td>getNodes</td>
+				<td>
+					»ñÈ¡Ö¸¶¨½Úµã  atguments[0] ½ÚµãÊôÐÔ£¬arguments[1] ½ÚµãÖµ »ò½Úµã¹ýÂËÆ÷£¨·µ»Øtrue ºöÂÔ½Úµã  ²»·µ»¹»ònull ½ÚµãÂú×ãÌõ¼þ  ·µ»Øfalse ÖÕÖ¹²éÕÒ£© »òÕýÔò±í´ïÊ½ ,arguments[2] ¸¸¼¶½Úµã£¨¿É¿Õ£© Ã»ÓÐÔòÈ«¾Ö²éÕÒ 
+				</td>
+				<td>·µ»ØÆ¥Åä³É¹¦µÄ½Úµã</td>
+			</tr>
+			<tr>
+				<td>getRoot</td>
+				<td>
+					»ñÈ¡¸ù½ÚµãÊý¾Ý
+				</td>
+				<td></td>
+			</tr>
+			<tr>
+				<td>getNodeParent</td>
+				<td>
+					»ñÈ¡¸ù½ÚµãµÄ¸¸¼¶½Úµã  µ±´«ÈëµÄÊÇ¸ù½Úµã Ôò·µ»Ø [];
+				</td>
+				<td></td>
+			</tr>
+			<tr>
+				<td>getNodePath</td>
+				<td>
+					»ñÈ¡Ö¸¶¨½ÚµãÂ·¾¶  ´Ó¸ù½Úµã µ½µ±Ç°´«Èë½ÚµãËùÍ¨¹ýµÄ½Úµã  Èë²Î ½ÚµãÊý¾Ý
+				</td>
+				<td></td>
+			</tr>
+			<tr>
+				<td>loadData</td>
+				<td>
+					½ÚµãÊý¾Ý¼ÓÔØ     Èë²Î ½ÚµãÊý¾Ý¼¯ºÏ
+				</td>
+				<td></td>
+			</tr>
+			<tr><td colspan="3">À©Õ¹$.fn.listview.methods</td></tr>
+		</table>
+		
+		<div>
+			<h1>À©Õ¹demo</h1>
+			<pre>
+				<code>
+					(function($,undefined){
+						'use strict';
+						$.extend(true,$.fn.listview.methods,{
+							disableNodes:function(filter){
+								return this.each(function(){
+									$(this).listview("refeshNodes",function(node){
+										if(filter(node)){
+											node.checked = false;
+											node.checkDisable = true;
+										}
+									},function(options,node){
+										return true;
+									});
+								})
+							}
+						});
+					})(jQuery)
+				</code>
+			</pre>
+		</div>
+		<script type="text/javascript">
+			var text = $("code").text();
+			var keyword = [/(var)/ig,/(static)/ig,/(function)/ig,/(this)/ig,/(return)/ig,/(true)/ig,/(false)/ig,/(\".*?\")/ig,/(\(.*?\))/ig];
+			for(var i=0;i<keyword.length;i++){
+				if(i>6&&i<9){
+					text = text.replace(keyword[i],"<span style='color:#0D35FB'>$1</span>");
+				}else {
+					text = text.replace(keyword[i],"<span style='color:#FB0D0D;font-weight:bold;'>$1</span>");
+				}
+			}
+			$("code").html(text);
+		</script>
+	</body>
+</html>

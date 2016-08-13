@@ -1,0 +1,58 @@
+.listview{
+			padding: 10px;
+		}
+		.listview .icon{
+			padding: 5px;
+		}
+		.listview .icon-right{
+			float:right;
+			line-height: 40px;
+		}
+		.listview ul{
+			list-style: none;
+			margin: 0;
+			padding: 0;
+		}
+		.listview ul li:first-child{
+			border-top:1px solid #ddd;
+			border-top-left-radius:5px;
+			border-top-right-radius:5px;
+		}
+		.listview .icon-disable{
+			color:#aaa;
+			font-weight:blod;
+		}
+		.listview .icon-check-half{
+			color:#09f;
+		}
+		.listview .icon-number{
+			color:#aaa;
+			font-family: "Verdana";
+			margin-right:10px;
+		}
+		.listview ul li:last-child{
+			border-bottom-left-radius:5px;
+			border-bottom-right-radius:5px;
+		}
+		.listview ul li {
+			line-height:40px;
+			border:1px solid #ddd;
+			border-top:none;
+			padding:0px 10px;
+		}
+		.listview .current_node{
+			background:-moz-linear-gradient( top,#bbb,#fff,#ddd);
+			background:-webkit-linear-gradient(top,#eee,#fff,#efefef);
+		}
+		.listview .btn-back{
+			color:#FFF;
+			background: #65C0F3;
+			padding: 5px;
+			border-radius:5px;
+		}
+		.listview .btn-back:active{
+			background: #40BBFF;
+		}
+		.listview .btn-text{
+			padding-left:10px;
+		}
